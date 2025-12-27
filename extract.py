@@ -23,6 +23,11 @@ inv_date_re_pattern = r'Order Date\s*:\s*(\d{4}-\d{2}-\d{2})'
     
 files = os.listdir(directory)
 
+files = [
+    f for f in os.listdir(directory)
+    if f.endswith(".pdf")
+]
+
 if not files:
     raise Exception("Nenhum arquivo encontrado!")
 
