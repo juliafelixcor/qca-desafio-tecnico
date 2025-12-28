@@ -1,2 +1,3 @@
 invoices-pdf/*.pdf
 database.json
+__pycache__/
