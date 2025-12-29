@@ -5,7 +5,11 @@ class InvoiceAnalyzer:
         self.path = path
         
     def normalize_invoices(self):
-        df = pd.read_json(self.path)
+        try:
+            df = pd.read_json(self.path)
+        except FileNotFoundError:
+            raise Exception("Arquivo database.json não foi encontrado!")
+            
         df = df.explode("products").reset_index(drop=True)
         products = pd.json_normalize(df["products"])
         df = pd.concat([df.drop(columns=["products"]), products], axis=1)
