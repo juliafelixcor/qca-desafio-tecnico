@@ -16,15 +16,16 @@ class InvoiceExtractor:
         self.dataset = []
     
     def existing_ids(self):
-        existing_order_ids = set()
+        if not os.path.exists("database.json"):
+            return set()
 
-        if os.path.exists("database.json"):
-            with open("database.json", "r", encoding="utf-8") as f:
-                existing_data = json.load(f)
+        with open("database.json", "r", encoding="utf-8") as f:
+            existing_data = json.load(f)
 
             existing_order_ids = {
                 item["orderId"] for item in existing_data
             }
+
         return existing_order_ids
     
     def extracting_information(self, existing_order_ids):
@@ -40,18 +41,14 @@ class InvoiceExtractor:
             
             if not (match_id and match_customer and match_date and table):
                 continue
-            
-            if match_id:
-                invoice_id = match_id.group(1)
-            
+
+            invoice_id = int(match_id.group(1))
+
             if invoice_id in existing_order_ids:
                 continue
 
-            if match_customer:
-                invoice_customer = match_customer.group(1)
-                
-            if match_date:
-                invoice_date = datetime.datetime.strptime(match_date.group(1), "%Y-%m-%d").date()
+            invoice_customer = match_customer.group(1)
+            invoice_date = datetime.datetime.strptime(match_date.group(1), "%Y-%m-%d").date()
                 
             item = Invoice(
                 orderId = invoice_id,
@@ -68,6 +65,7 @@ class InvoiceExtractor:
             )
 
             self.dataset.append(item.model_dump(mode="json"))
+            existing_order_ids.add(invoice_id)
         
     def save_json(self): 
         with open("database.json", "w", encoding="utf-8") as f:
